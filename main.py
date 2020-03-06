@@ -362,7 +362,8 @@ r_line = Line()
 
 def process_image(img):
     
-    new_img = np.copy(img)
+    draw_img_new = np.copy(img)
+    new_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img_bin, Minv = pipeline(new_img)
     
     # if both left and right lines were detected last frame, use polyfit_using_prev_fit, otherwise use sliding window
@@ -387,7 +388,7 @@ def process_image(img):
     
     # draw the current best fit if it exists
     if l_line.best_fit is not None and r_line.best_fit is not None:
-        img_out1 = draw_lane(new_img, img_bin, l_line.best_fit, r_line.best_fit, Minv)
+        img_out1 = draw_lane(draw_img_new, img_bin, l_line.best_fit, r_line.best_fit, Minv)
         rad_l, rad_r, d_center = calc_curv_rad_and_center_dist(img_bin, l_line.best_fit, r_line.best_fit, 
                                                                l_lane_inds, r_lane_inds)
         img_out = draw_data(img_out1, (rad_l+rad_r)/2, d_center)
@@ -427,22 +428,22 @@ def process_image(img):
                                     ' {:0.6f}'.format(l_fit[2])
         else:
             text = 'This fit L: None'
-        cv2.putText(diag_img, text, (40,380), font, .5, color_ok, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,380), font, .5, color_ok, 1, cv2.LINE_AA)
         if r_fit is not None:
             text = 'This fit R: ' + ' {:0.6f}'.format(r_fit[0]) + \
                                     ' {:0.6f}'.format(r_fit[1]) + \
                                     ' {:0.6f}'.format(r_fit[2])
         else:
             text = 'This fit R: None'
-        cv2.putText(diag_img, text, (40,400), font, .5, color_ok, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,400), font, .5, color_ok, 1, cv2.LINE_AA)
         text = 'Best fit L: ' + ' {:0.6f}'.format(l_line.best_fit[0]) + \
                                 ' {:0.6f}'.format(l_line.best_fit[1]) + \
                                 ' {:0.6f}'.format(l_line.best_fit[2])
-        cv2.putText(diag_img, text, (40,440), font, .5, color_ok, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,440), font, .5, color_ok, 1, cv2.LINE_AA)
         text = 'Best fit R: ' + ' {:0.6f}'.format(r_line.best_fit[0]) + \
                                 ' {:0.6f}'.format(r_line.best_fit[1]) + \
                                 ' {:0.6f}'.format(r_line.best_fit[2])
-        cv2.putText(diag_img, text, (40,460), font, .5, color_ok, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,460), font, .5, color_ok, 1, cv2.LINE_AA)
         text = 'Diffs L: ' + ' {:0.6f}'.format(l_line.diffs[0]) + \
                              ' {:0.6f}'.format(l_line.diffs[1]) + \
                              ' {:0.6f}'.format(l_line.diffs[2])
@@ -452,7 +453,7 @@ def process_image(img):
             diffs_color = color_bad
         else:
             diffs_color = color_ok
-        cv2.putText(diag_img, text, (40,500), font, .5, diffs_color, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,500), font, .5, diffs_color, 1, cv2.LINE_AA)
         text = 'Diffs R: ' + ' {:0.6f}'.format(r_line.diffs[0]) + \
                              ' {:0.6f}'.format(r_line.diffs[1]) + \
                              ' {:0.6f}'.format(r_line.diffs[2])
@@ -462,13 +463,13 @@ def process_image(img):
             diffs_color = color_bad
         else:
             diffs_color = color_ok
-        cv2.putText(diag_img, text, (40,520), font, .5, diffs_color, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,520), font, .5, diffs_color, 1, cv2.LINE_AA)
         text = 'Good fit count L:' + str(len(l_line.current_fit))
-        cv2.putText(diag_img, text, (40,560), font, .5, color_ok, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,560), font, .5, color_ok, 1, cv2.LINE_AA)
         text = 'Good fit count R:' + str(len(r_line.current_fit))
-        cv2.putText(diag_img, text, (40,580), font, .5, color_ok, 1, cv2.LINE_AA)
+        cv2.putText(draw_img_new, text, (40,580), font, .5, color_ok, 1, cv2.LINE_AA)
         
-        img_out = diag_img
+        img_out = draw_img_new
     return img_out
 
 
@@ -481,12 +482,12 @@ if __name__ == "__main__":
     # video_input1 = VideoFileClip('project_video.mp4')#.subclip(22,26)
     # processed_video = video_input2.fl_image(process_image)
      
-    cap = cv2.VideoCapture("./challenge_video.mp4")
-    
+    # cap = cv2.VideoCapture("./harder_challenge_video.mp4")
+    cap = cv2.VideoCapture("./project_video.mp4")
     while cap.isOpened():
         
         ret,frame = cap.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
         frame = cv2.resize(frame,(1280,720))
         #print("1111111")
         start_time = time.time()
